@@ -35,28 +35,28 @@ class Api implements ApiInterface
         // Log::debug('Pay.WeChat.goPay, order_no:' . $out_trade_no.', step1');
         $amount = $amount_cent;
         $payway = strtoupper($config['payway']);
-        if (strpos(@$_SERVER['HTTP_USER_AGENT'], 'MicroMessenger') !== false) {
-            $payway = 'JSAPI'; // 微信内部
-            $pay_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://{$_SERVER['HTTP_HOST']}" . '/pay/' . $out_trade_no;
-            $auth_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=' . $config['APPID'] . '&redirect_uri=' . urlencode($pay_url) . '&response_type=code&scope=snsapi_base#wechat_redirect';
+        // if (strpos(@$_SERVER['HTTP_USER_AGENT'], 'MicroMessenger') !== false) {
+        //     $payway = 'JSAPI'; // 微信内部
+        //     $pay_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://{$_SERVER['HTTP_HOST']}" . '/pay/' . $out_trade_no;
+        //     $auth_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=' . $config['APPID'] . '&redirect_uri=' . urlencode($pay_url) . '&response_type=code&scope=snsapi_base#wechat_redirect';
 
-            if (!isset($_GET['code'])) {
-                header('Location: ' . $auth_url);
-                exit;
-            }
+        //     if (!isset($_GET['code'])) {
+        //         header('Location: ' . $auth_url);
+        //         exit;
+        //     }
 
-            $request_url = 'https://api.weixin.qq.com/sns/oauth2/access_token?appid=' . $config['APPID'] . '&secret=' . $config['APPSECRET'] . '&code=' . $_GET['code'] . '&grant_type=authorization_code';
-            $ret = @json_decode(CurlRequest::get($request_url), true);
-            if (!is_array($ret) || empty($ret['openid'])) {
-                if (isset($ret['errcode']) && $ret['errcode'] === 40163) {
+        //     $request_url = 'https://api.weixin.qq.com/sns/oauth2/access_token?appid=' . $config['APPID'] . '&secret=' . $config['APPSECRET'] . '&code=' . $_GET['code'] . '&grant_type=authorization_code';
+        //     $ret = @json_decode(CurlRequest::get($request_url), true);
+        //     if (!is_array($ret) || empty($ret['openid'])) {
+        //         if (isset($ret['errcode']) && $ret['errcode'] === 40163) {
                     // code been used, 已经用过(用户的刷新行为), 重新发起
-                    header('Location: ' . $auth_url);
-                    exit;
-                }
-                die('<h1>获取微信OPENID<br>错误信息: ' . (isset($ret['errcode']) ? $ret['errcode'] : $ret) . '<br>' . (isset($ret['errmsg']) ? $ret['errmsg'] : $ret) . '<br>请返回重试</h1>');
-            }
-            $openid = $ret['openid'];
-        } else {
+        //             header('Location: ' . $auth_url);
+        //             exit;
+        //         }
+        //         die('<h1>获取微信OPENID<br>错误信息: ' . (isset($ret['errcode']) ? $ret['errcode'] : $ret) . '<br>' . (isset($ret['errmsg']) ? $ret['errmsg'] : $ret) . '<br>请返回重试</h1>');
+        //     }
+        //     $openid = $ret['openid'];
+        // } else {
             // 如果在微信外部, 且支付方式是JSAPI, 二维码为当前页面
             if ($payway === 'JSAPI') {
                 $pay_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://{$_SERVER['HTTP_HOST']}" . '/pay/' . $out_trade_no;
@@ -65,7 +65,7 @@ class Api implements ApiInterface
                 header('Location: /qrcode/pay/' . $out_trade_no . '/wechat?url=' . urlencode($pay_url));
                 exit;
             }
-        }
+        // }
         $this->defineWxConfig($config);
         require_once __DIR__ . '/lib/WxPay.Api.php';
         require_once 'WxPay.NativePay.php';
