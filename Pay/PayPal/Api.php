@@ -218,7 +218,7 @@ function getUsd($cny)
         // 记录错误日志
         // error_log('获取汇率失败: ' . $e->getMessage());
         // 返回默认汇率（例如 0.15）或抛出异常
-        return $cny * 0.15;
+        return $cny * 0.137;
     }
 }
 
